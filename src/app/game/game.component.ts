@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Game } from '../../models/game';
 import { PlayerComponent } from '../player/player.component';
@@ -7,7 +7,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { GameInfoComponent } from '../game-info/game-info.component';
-import { Firestore, collection, collectionData, onSnapshot, doc, addDoc } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, onSnapshot, doc, addDoc, query, where } from '@angular/fire/firestore';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-game',
@@ -16,45 +17,56 @@ import { Firestore, collection, collectionData, onSnapshot, doc, addDoc } from '
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss'
 })
-export class GameComponent implements OnInit{
+export class GameComponent implements OnInit {
   pickCardAnimation = false;
   game: Game;
   currentCard: string | any = '';
-  unsubList;
 
-  constructor(private firestore: Firestore, public dialog: MatDialog) {
+  constructor(private route: ActivatedRoute, private firestore: Firestore, public dialog: MatDialog) {
     this.game = new Game();
-    this.unsubList = onSnapshot(this.getGameRef(), (list) => {
-      list.forEach(element => {
-        console.log(element);
-      });
-    });
   }
 
   ngOnInit(): void {
-    // return onSnapshot(this.getGameRef, (list) => {
-    //   list.docChanges().forEach((game: Game) => {
-    //     console.log('Game update', game);
+    // this.newGame();
+    this.route.params.subscribe((params) => {
+      const q = query(this.getGameRef(), where("id", "==", params['id']));
+      onSnapshot(q, (gameData) => {
+        this.game.currentPlayer = gameData.currentPlayer;
+        this.game.playedCards = gameData.playedCards;
+        this.game.players = gameData.players;
+        this.game.stack = gameData.stack;
+      });
+    //   onSnapshot(q, (list) => {
+    //     list.docChanges().forEach((game: any) => {
+    //       console.log('Game update', game);
+    //       this.game.currentPlayer = game.currentPlayer;
+    //       this.game.playedCards = game.playedCards;
+    //       this.game.players = game.players;
+    //       this.game.stack = game.stack;
+    //     });
     //   });
-    // });
-    this.newGame();
-  }
-
-  ngonDestory(){
-    this.unsubList();
-  }
-
-  async newGame(){
-    this.game = new Game();
-    await addDoc(this.getGameRef(), this.game.toJson()).catch((err) => {
-      console.error(err);
-    }).then((docRef) => {
-      console.log("Document written with ID: ", docRef?.id);
     });
   }
 
-  getGameRef(){
-    return collection(this.firestore ,'games');
+  ngonDestory() {
+
+  }
+
+  async newGame() {
+    this.game = new Game();
+    // await addDoc(this.getGameRef(), this.game.toJson()).catch((err) => {
+    //   console.error(err);
+    // }).then((docRef) => {
+    //   console.log("Document written with ID: ", docRef?.id);
+    // });
+  }
+
+  getGameRef() {
+    return collection(this.firestore, 'games');
+  }
+
+  subGameData(){
+
   }
 
   takeCard() {
