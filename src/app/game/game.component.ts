@@ -48,10 +48,6 @@ export class GameComponent implements OnInit {
     });
   }
 
-  ngonDestory() {
-
-  }
-
   async newGame() {
     this.game = new Game();
     // await addDoc(this.getGameRef(), this.game.toJson()).catch((err) => {
@@ -63,10 +59,6 @@ export class GameComponent implements OnInit {
 
   getGameRef() {
     return collection(this.firestore, 'games');
-  }
-
-  subGameData(){
-
   }
 
   takeCard() {
