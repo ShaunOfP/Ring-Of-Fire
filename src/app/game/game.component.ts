@@ -22,7 +22,7 @@ export class GameComponent implements OnInit {
   game: Game;
   currentCard: string | any = '';
   unsub: any;
-  gameData: any;
+  gameData: Game[] = [];
   unsubGameData;
 
   constructor(private route: ActivatedRoute, private firestore: Firestore, public dialog: MatDialog) {
