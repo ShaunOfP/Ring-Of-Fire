@@ -39,23 +39,26 @@ export class GameComponent implements OnInit {
 
   getGameDataSnapshot(params: any) {
     const q = query(this.getGameRef(), where("id", "==", params['id']));
-    console.log(this.game);
+    // console.log(this.game);
+    // console.log(this.gameData);
 
     return onSnapshot(q, (data) => {
-      this.game.currentPlayer = data?.currentPlayer;
-      this.game.playedCards = data?.playedCards;
-      this.game.players = data?.players;
-      this.game.stack = data?.stack;
-      this.game.id = data?.id;
+      // this.game.currentPlayer = data?.currentPlayer;
+      // this.game.playedCards = data?.playedCards;
+      // this.game.players = data?.players;
+      // this.game.stack = data?.stack;
+      // this.game.id = data?.id;
     });
   }
 
   subGameData() {
-    return onSnapshot(this.getGameRef(), (data) => {
+    const q = query(this.getGameRef(), where("id", "==", 'WXwO8aNb7xrO6QBff4wp'));
+    return onSnapshot(q, (data) => {
       this.gameData = [];
       data.forEach(element => {
         this.gameData.push(this.setGameObject(element.data(), element.id));
       });
+      console.log(this.gameData);
     });
   }
 
