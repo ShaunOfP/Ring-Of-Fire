@@ -22,12 +22,9 @@ export class GameComponent implements OnInit {
   game: Game;
   currentCard: string | any = '';
   unsub: any;
-  gameData: Game[] = [];
-  unsubGameData;
 
   constructor(private route: ActivatedRoute, private firestore: Firestore, public dialog: MatDialog) {
     this.game = new Game();
-    this.unsubGameData = this.subGameData();
   }
 
   ngOnInit(): void {
@@ -38,47 +35,17 @@ export class GameComponent implements OnInit {
   }
 
   getGameDataSnapshot(params: any) {
-    const q = query(this.getGameRef(), where("id", "==", params['id']));
-    // console.log(this.game);
-    // console.log(this.gameData);
-
-    return onSnapshot(q, (data) => {
-      // this.game.currentPlayer = data?.currentPlayer;
-      // this.game.playedCards = data?.playedCards;
-      // this.game.players = data?.players;
-      // this.game.stack = data?.stack;
-      // this.game.id = data?.id;
+    return onSnapshot(doc(this.getGameRef(), params['id']), (data) => {
+      console.log(data);
+      this.game.currentPlayer = data?.currentPlayer;
+      this.game.playedCards = data?.playedCards;
+      this.game.players = data?.players;
+      this.game.stack = data?.stack;
     });
-  }
-
-  subGameData() {
-    const q = query(this.getGameRef(), where("id", "==", 'WXwO8aNb7xrO6QBff4wp'));
-    return onSnapshot(q, (data) => {
-      this.gameData = [];
-      data.forEach(element => {
-        this.gameData.push(this.setGameObject(element.data(), element.id));
-      });
-      console.log(this.gameData);
-    });
-  }
-
-  setGameObject(obj: any, id: string): Game {
-    let games = new Game();
-    games.id = id;
-    games.players = obj.players;
-    games.stack = obj.stack;
-    games.playedCards = obj.playedCards;
-    games.currentPlayer = obj.currentPlayer;
-    return games;
-  }
-
-  getSingleGameRef(docId: string) {
-    return doc(collection(this.firestore, 'games'), docId);
   }
 
   ngonDestroy() {
     this.unsub();
-    this.unsubGameData();
   }
 
   async newGame() {
