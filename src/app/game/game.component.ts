@@ -32,7 +32,6 @@ export class GameComponent implements OnInit {
 
   ngOnInit(): void {
     // this.newGame();
-
     this.route.params.subscribe((params) => {
       this.unsub = this.getGameDataSnapshot(params);
     })
@@ -40,25 +39,15 @@ export class GameComponent implements OnInit {
 
   getGameDataSnapshot(params: any) {
     const q = query(this.getGameRef(), where("id", "==", params['id']));
-    this.gameData.forEach(element => {
-      console.log(element);
-      if (element.id == params['id']){
-        this.game.currentPlayer = element?.currentPlayer;
-        this.game.playedCards = element?.playedCards;
-        this.game.players = element?.players;
-        this.game.stack = element?.stack;
-        this.game.id = element?.id;;
-      }
-    });
+    console.log(this.game);
 
-    // return onSnapshot(q, (data) => {
-    //   // console.log(data);
-    //   // this.game.currentPlayer = data?.currentPlayer;
-    //   // this.game.playedCards = gameData?.playedCards;
-    //   // this.game.players = gameData?.players;
-    //   // this.game.stack = gameData?.stack;
-    //   // this.game.id = gameData?.id;
-    // });
+    return onSnapshot(q, (data) => {
+      this.game.currentPlayer = data?.currentPlayer;
+      this.game.playedCards = data?.playedCards;
+      this.game.players = data?.players;
+      this.game.stack = data?.stack;
+      this.game.id = data?.id;
+    });
   }
 
   subGameData() {
@@ -67,18 +56,17 @@ export class GameComponent implements OnInit {
       data.forEach(element => {
         this.gameData.push(this.setGameObject(element.data(), element.id));
       });
-      console.log(this.gameData);
     });
   }
 
-  setGameObject(obj: any, id: string) {
-    return {
-      id: id,
-      players: obj.players,
-      stack: obj.stack,
-      playedCards: obj.playedCards,
-      currentPlayer: obj.currentPlayer
-    }
+  setGameObject(obj: any, id: string): Game {
+    let games = new Game();
+    games.id = id;
+    games.players = obj.players;
+    games.stack = obj.stack;
+    games.playedCards = obj.playedCards;
+    games.currentPlayer = obj.currentPlayer;
+    return games;
   }
 
   getSingleGameRef(docId: string) {
