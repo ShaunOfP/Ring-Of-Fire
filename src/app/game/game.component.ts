@@ -35,12 +35,11 @@ export class GameComponent implements OnInit {
   }
 
   getGameDataSnapshot(params: any) {
-    return onSnapshot(doc(this.getGameRef(), params['id']), (data) => {
-      console.log(data);
-      this.game.currentPlayer = data?.currentPlayer;
-      this.game.playedCards = data?.playedCards;
-      this.game.players = data?.players;
-      this.game.stack = data?.stack;
+    return onSnapshot(doc(this.getGameRef(), params['id']), (GameData: any) => {
+      this.game.currentPlayer = GameData?.currentPlayer;
+      this.game.playedCards = GameData?.playedCards;
+      this.game.players = GameData?.players;
+      this.game.stack = GameData?.stack;
     });
   }
 
@@ -50,11 +49,11 @@ export class GameComponent implements OnInit {
 
   async newGame() {
     this.game = new Game();
-    await addDoc(this.getGameRef(), this.game.toJson()).catch((err) => {
-      console.error(err);
-    }).then((docRef) => {
-      console.log("Document written with ID: ", docRef?.id);
-    });
+    // await addDoc(this.getGameRef(), this.game.toJson()).catch((err) => {
+    //   console.error(err);
+    // }).then((docRef) => {
+    //   console.log("Document written with ID: ", docRef?.id);
+    // });
   }
 
   getGameRef() {
