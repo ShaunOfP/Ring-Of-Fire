@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddPlayerComponent } from '../dialog-add-player/dialog-add-player.component';
 import { GameInfoComponent } from '../game-info/game-info.component';
-import { Firestore, collection, collectionData, onSnapshot, doc, addDoc, query, where } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, onSnapshot, doc, addDoc, query, where, updateDoc } from '@angular/fire/firestore';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -18,28 +18,30 @@ import { ActivatedRoute } from '@angular/router';
   styleUrl: './game.component.scss'
 })
 export class GameComponent implements OnInit {
-  pickCardAnimation = false;
   game: Game;
-  currentCard: string | any = '';
   unsub: any;
+  gameID: string;
 
   constructor(private route: ActivatedRoute, private firestore: Firestore, public dialog: MatDialog) {
     this.game = new Game();
+    this.gameID = '';
   }
 
   ngOnInit(): void {
-    // this.newGame();
     this.route.params.subscribe((params) => {
-      this.unsub = this.getGameDataSnapshot(params);
+      this.gameID = params['id'];
+      this.unsub = this.getGameDataSnapshot();
     })
   }
 
-  getGameDataSnapshot(params: any) {
-    return onSnapshot(doc(this.getGameRef(), params['id']), (GameData: any) => {
-      this.game.currentPlayer = GameData?.currentPlayer;
-      this.game.playedCards = GameData?.playedCards;
-      this.game.players = GameData?.players;
-      this.game.stack = GameData?.stack;
+  getGameDataSnapshot() {
+    return onSnapshot(doc(this.getGameRef(), this.gameID), (GameData: any) => {
+      this.game.currentPlayer = GameData.data().currentPlayer;
+      this.game.playedCards = GameData.data().playedCards;
+      this.game.players = GameData.data().players;
+      this.game.stack = GameData.data().stack;
+      this.game.pickCardAnimation = GameData.data().pickCardAnimation;
+      this.game.currentCard = GameData.data().currentCard;
     });
   }
 
@@ -49,11 +51,6 @@ export class GameComponent implements OnInit {
 
   async newGame() {
     this.game = new Game();
-    // await addDoc(this.getGameRef(), this.game.toJson()).catch((err) => {
-    //   console.error(err);
-    // }).then((docRef) => {
-    //   console.log("Document written with ID: ", docRef?.id);
-    // });
   }
 
   getGameRef() {
@@ -61,14 +58,16 @@ export class GameComponent implements OnInit {
   }
 
   takeCard() {
-    if (!this.pickCardAnimation) {
-      this.currentCard = this.game.stack.pop();
-      this.pickCardAnimation = true;
+    if (!this.game.pickCardAnimation) {
+      this.game.currentCard = this.game.stack.pop();
+      this.game.pickCardAnimation = true;
       this.game.currentPlayer++;
       this.game.currentPlayer = this.game.currentPlayer & this.game.players.length;
+      this.updateGame();
       setTimeout(() => {
-        this.game.playedCards.push(this.currentCard);
-        this.pickCardAnimation = false;
+        this.game.playedCards.push(this.game.currentCard);
+        this.game.pickCardAnimation = false;
+        this.updateGame();
       }, 1000);
     }
   }
@@ -79,7 +78,12 @@ export class GameComponent implements OnInit {
     dialogRef.afterClosed().subscribe((name: string) => {
       if (name && name.length > 0) {
         this.game.players.push(name);
+        this.updateGame();
       }
     });
+  }
+
+  async updateGame(){
+    await updateDoc(doc(this.getGameRef(), this.gameID), this.game.toJson()).catch((err) => console.log(err));
   }
 }
