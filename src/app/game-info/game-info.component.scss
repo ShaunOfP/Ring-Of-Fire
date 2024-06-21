@@ -3,4 +3,7 @@ mat-card{
         padding-left: 15px;
         padding-top: 5px;
     }
+    @media(max-width: 720px){
+        min-height: 120px;
+    }
 }

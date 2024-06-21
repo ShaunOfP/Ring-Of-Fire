@@ -1,15 +1,20 @@
-<app-player *ngFor="let player of game.players; let i = index;" [ngStyle]="{'top.px': 100 + (i * 90)}" [name]="player" [playerActive]="i == game.currentPlayer"
-    class="player-position"></app-player>
+<app-player *ngFor="let player of game.players; let i = index;" [ngStyle]="{'top.px': 100 + (i * 90)}" [name]="player"
+    [playerActive]="i == game.currentPlayer" class="player-position hide-mobile"></app-player>
+
+<div class="scroll-container hide-desktop">
+    <app-player-mobile *ngFor="let player of game.players; let i = index;" [name]="player"
+        [playerActive]="i == game.currentPlayer"></app-player-mobile>
+</div>
 
 <div class="field">
     <div class="card-stack">
         <img *ngFor="let c of [0,1,2,3]; let i = index;" [ngStyle]="{'right.px': i * 5}"
             src="assets/img/cards/card_cover.png">
-        <img (click)="takeCard()" [class.pick-card]="game.pickCardAnimation" class="top-card" [ngStyle]="{'right.px': 25}"
-            src="assets/img/cards/card_cover.png">
+        <img (click)="takeCard()" [class.pick-card]="game.pickCardAnimation" class="top-card"
+            [ngStyle]="{'right.px': 25}" src="assets/img/cards/card_cover.png">
         <img *ngFor="let card of game.playedCards" class="played-card" src="assets/img/cards/{{ card }}.png">
-        <img (click)="takeCard()" *ngIf="game.pickCardAnimation" [class.pick-card]="game.pickCardAnimation" class="pick-card"
-            [ngStyle]="{'right.px': 25}" src="assets/img/cards/{{ game.currentCard }}.png">
+        <img (click)="takeCard()" *ngIf="game.pickCardAnimation" [class.pick-card]="game.pickCardAnimation"
+            class="pick-card" [ngStyle]="{'right.px': 25}" src="assets/img/cards/{{ game.currentCard }}.png">
 
     </div>
 </div>
